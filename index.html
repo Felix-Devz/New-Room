@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Secret Room</title>
+<link rel="icon" type="image/png" href="spy3.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=Caveat:wght@600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div id="stars"></div>
+
+<div id="menuView" class="view">
+  <div class="menu-wrap">
+    <div class="menu-badge"><img src="logo/spy.png" alt="Logo"/></div>
+    <h2>Secret Room</h2>
+    <p class="login-sub">Pilih momen yang mau kamu buka</p>
+
+    <div class="menu-options">
+      <a href="login.html#tipe=foto" class="menu-card">
+        <span class="menu-icon">📷</span>
+        <span class="menu-title">Momen Foto</span>
+        <span class="menu-desc">Kumpulan foto kenangan kelas</span>
+      </a>
+      <a href="login.html#tipe=video" class="menu-card">
+        <span class="menu-icon">🎥</span>
+        <span class="menu-title">Momen Video</span>
+        <span class="menu-desc">Kumpulan video kenangan kelas</span>
+      </a>
+    </div>
+  </div>
+</div>
+
+<script>
+  (function(){
+    const container = document.getElementById('stars');
+    const frag = document.createDocumentFragment();
+    for(let i=0;i<55;i++){
+      const s = document.createElement('div');
+      s.className = 'star';
+      s.style.left = Math.random()*100 + '%';
+      s.style.top = Math.random()*100 + '%';
+      s.style.animationDelay = (Math.random()*4) + 's';
+      const size = (Math.random()*1.6+0.6);
+      s.style.width = size + 'px';
+      s.style.height = size + 'px';
+      frag.appendChild(s);
+    }
+    container.appendChild(frag);
+  })();
+</script>
+</body>
+</html>
