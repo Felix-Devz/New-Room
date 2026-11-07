@@ -1,3 +1,4 @@
+
 import { supabase } from './supabaseClient.js';
 import { supabaseVideo } from './supabaseClientVideo.js';
 
@@ -5,35 +6,54 @@ const form = document.getElementById('loginForm');
 const errorEl = document.getElementById('loginError');
 const loginSub = document.getElementById('loginSub');
 
-// Ambil pilihan (foto/video) dari hash URL (#tipe=video), BUKAN dari
-// query string (?tipe=video) — karena server 'serve' suka redirect
-// login.html -> login dan membuang query string-nya. Hash (#...) aman
-// karena tidak pernah dikirim ke server, jadi tidak ikut kebuang.
-const hashParams = new URLSearchParams(window.location.hash.replace(/^#/, ''));
+const hashParams = new URLSearchParams(
+  window.location.hash.replace(/^#/, '')
+);
+
 let tipe = hashParams.get('tipe');
+
 if (tipe === 'foto' || tipe === 'video') {
   sessionStorage.setItem('secretRoomTipe', tipe);
 } else {
   tipe = sessionStorage.getItem('secretRoomTipe') || 'foto';
 }
 
-// Foto dan video sekarang ada di project Supabase yang BERBEDA,
-// jadi pilih client sesuai tipe yang dipilih user.
+// Pilih project sesuai galeri
 const client = tipe === 'video' ? supabaseVideo : supabase;
-const dest = tipe === 'video' ? 'video-gallery.html' : 'gallery.html';
+const dest = tipe === 'video'
+  ? 'video-gallery.html'
+  : 'gallery.html';
+
 if (loginSub) {
   loginSub.textContent = tipe === 'video'
     ? 'Masuk untuk melihat momen video kelas XII Satelit'
     : 'Masuk untuk melihat momen foto kelas XII Satelit';
 }
 
-// Kalau sudah login sebelumnya (di project yang sesuai), langsung lempar ke galeri yang dipilih
-client.auth.getSession().then(({ data }) => {
-  if (data.session) window.location.href = dest;
-});
+// Cek sesi sebelumnya
+async function checkSession() {
+  try {
+    const { data, error } = await client.auth.getSession();
 
+    if (error) {
+      console.error('Session error:', error);
+      return;
+    }
+
+    if (data.session) {
+      window.location.href = dest;
+    }
+  } catch (err) {
+    console.error('Session connection error:', err);
+  }
+}
+
+checkSession();
+
+// Proses login
 form.addEventListener('submit', async (e) => {
   e.preventDefault();
+
   errorEl.textContent = '';
 
   const email = document.getElementById('email').value.trim();
@@ -43,15 +63,43 @@ form.addEventListener('submit', async (e) => {
   btn.disabled = true;
   btn.textContent = 'Memproses...';
 
-  const { error } = await client.auth.signInWithPassword({ email, password });
+  try {
+    console.log('Login menggunakan:', tipe);
 
-  btn.disabled = false;
-  btn.textContent = 'Masuk';
+    const { data, error } = await client.auth.signInWithPassword({
+      email,
+      password
+    });
 
-  if (error) {
-    errorEl.textContent = 'Email atau password salah.';
-    return;
+    if (error) {
+      console.error('Supabase Auth Error:', error);
+
+      if (
+        error.message.toLowerCase().includes('invalid login credentials')
+      ) {
+        errorEl.textContent = 'Email atau password salah.';
+      } else if (
+        error.message.toLowerCase().includes('email not confirmed')
+      ) {
+        errorEl.textContent = 'Email belum dikonfirmasi.';
+      } else {
+        errorEl.textContent = 'Login gagal: ' + error.message;
+      }
+
+      return;
+    }
+
+    if (data.session) {
+      window.location.href = dest;
+    }
+
+  } catch (err) {
+    console.error('Login connection error:', err);
+
+    errorEl.textContent =
+      'Tidak dapat terhubung ke server Supabase. Periksa koneksi atau URL project.';
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Masuk';
   }
-
-  window.location.href = dest;
 });
