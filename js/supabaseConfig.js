@@ -5,4 +5,4 @@
 
 export const SUPABASE_URL = "https://vulaomabsjdlbjknumzk.supabase.co";
 export const SUPABASE_ANON_KEY =
-  "sb_publishable_YX3NBZVKT92Mwv1N_BXcfA_WNnJGdHg";
+  "sb_publishable_3m0VWo6YgHM9H9Jl88nv_A_2n-G59h3";
